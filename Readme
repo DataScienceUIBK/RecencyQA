@@ -1,1 +1,114 @@
-How often do Answers Change? Estimating Recency Requirements in Question Answering
+# recencyQA  
+**How Often Do Answers Change? Estimating Recency Requirements in Question Answering**  
+SIGIR 2026
+
+---
+
+## 📌 Overview
+
+Large Language Models (LLMs) often answer time-sensitive questions using outdated knowledge. However, not all questions require the same level of freshness. Some answers change hourly, others yearly, and some never change at all.
+
+**recencyQA** introduces a principled way to model this temporal behavior.
+
+We propose a **Recency–Stationarity Taxonomy** and release **recencyQA**, the first dataset that explicitly annotates:
+
+- ✅ Expected answer update frequency (**Recency**)  
+- ✅ Context stability of that frequency (**Stationarity**)  
+- ✅ Verified temporal contexts inducing different recency interpretations  
+
+This enables fine-grained evaluation of temporal awareness in QA systems beyond binary “fresh vs outdated” distinctions.
+
+---
+
+## 🧠 Recency–Stationarity Taxonomy
+
+We characterize temporal sensitivity along **two orthogonal dimensions**:
+
+### 1️⃣ Recency (Expected Time Until Answer Changes)
+
+12 discrete classes ranging from highly volatile to permanent:
+
+| Class | Expected Change |
+|-------|-----------------|
+| An-Hour | Within an hour |
+| A-Few-Hours | Within a few hours |
+| A-Day | Within a day |
+| A-Few-Days | Within a few days |
+| A-Week | Within a week |
+| A-Few-Weeks | Within a few weeks |
+| A-Month | Within a month |
+| A-Few-Months | Within a few months |
+| A-Year | Within a year |
+| A-Few-Years | Within a few years |
+| Many-Years | After many years |
+| Never | Not expected to change |
+
+---
+
+### 2️⃣ Stationarity
+
+- **Stationary** → Recency class remains stable over time  
+- **Non-Stationary** → Recency class depends on context  
+
+Example:
+
+- *Who is the CEO of X?* → Typically stationary  
+- *Who is leading the Olympic medal table?* → Non-stationary  
+
+---
+
+## 📊 Dataset Statistics
+
+After verification and filtering:
+
+- **4,031 questions**
+- **12 recency classes**
+- **2,910 stationary questions**
+- **1,121 non-stationary questions**
+- Average question length: 14.26 words
+- Average context length: 22.22 words
+
+Each question includes:
+
+- 13 recency samples  
+- Majority recency label  
+- Full recency distribution  
+- Stationarity label  
+- Verified temporal context  
+- Structured JSON format  
+
+---
+
+## 📂 Dataset Access
+
+🚧 **Dataset Download (Coming Soon)**  
+
+
+Once released, this section will provide:
+
+- Full dataset (.json)
+- Train / Validation / Test splits (if applicable)
+- Prompt templates used in experiments
+- Context generation prompts
+
+---
+
+## 📁 Dataset Format
+
+Each JSON entry follows this structure:
+
+```json
+{
+  "question": "...",
+  "recency_samples": ["A-Day", "... (13 total)"],
+  "majority_recency_label": "A-Day",
+  "recency_distribution": {
+    "A-Day": 9,
+    "A-Week": 3,
+    "A-Month": 1
+  },
+  "stationarity": "stationary",
+  "verified_context": "..."
+}
+
+
