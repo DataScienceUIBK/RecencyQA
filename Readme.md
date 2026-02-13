@@ -1,5 +1,5 @@
 
-## RecencyQA  
+## Recency 
 **How Often Do Answers Change? Estimating Recency Requirements in Question Answering**  
 SIGIR 2026
 
