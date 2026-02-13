@@ -1,5 +1,4 @@
-
-## Recency QA 
+## recencyQA  
 **How Often Do Answers Change? Estimating Recency Requirements in Question Answering**  
 SIGIR 2026
 
@@ -82,10 +81,11 @@ Each question includes:
 
 ## 📂 Dataset Access
 
-🚧 **Dataset Download (Coming Soon)**  
+The dataset is available in the `Dataset` folder:
 
+📁 **[Dataset/RecencyQA](./Dataset/RecencyQA)**
 
-Once released, this section will provide:
+The dataset includes:
 
 - Full dataset (.json)
 - Train / Validation / Test splits (if applicable)
@@ -97,20 +97,10 @@ Once released, this section will provide:
 ## 📁 Dataset Format
 
 Each JSON entry follows this structure:
-```json
-{
-  "question": "...",
-  "recency_samples": ["A-Day", "... (13 total)"],
-  "majority_recency_label": "A-Day",
-  "recency_distribution": {
-    "A-Day": 9,
-    "A-Week": 3,
-    "A-Month": 1
-  },
-  "stationarity": "stationary",
-  "verified_context": "..."
-}
-```
+
+
+
+---
 
 ## 🔬 What recencyQA Evaluates
 
@@ -185,8 +175,8 @@ recencyQA enables research on:
 ## 📜 Citation
 
 If you use recencyQA, please cite:
-```
-Comming Soon
+
+```Comming Soon
 ```
 
 ---
@@ -194,6 +184,7 @@ Comming Soon
 ## 📄 Paper
 
 Paper PDF:
+
 ```
 Comming Soon
 ```
@@ -215,4 +206,3 @@ For questions, collaborations, or issues:
 - Adam Jatowt – adam.jatowt@uibk.ac.at  
 
 ---
-EOF
