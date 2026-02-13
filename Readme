@@ -1,3 +1,4 @@
+cat > README.md << 'EOF'
 ## recencyQA  
 **How Often Do Answers Change? Estimating Recency Requirements in Question Answering**  
 SIGIR 2026
@@ -16,7 +17,7 @@ We propose a **Recency–Stationarity Taxonomy** and release **recencyQA**, the 
 - ✅ Context stability of that frequency (**Stationarity**)  
 - ✅ Verified temporal contexts inducing different recency interpretations  
 
-This enables fine-grained evaluation of temporal awareness in QA systems beyond binary “fresh vs outdated” distinctions.
+This enables fine-grained evaluation of temporal awareness in QA systems beyond binary "fresh vs outdated" distinctions.
 
 ---
 
@@ -174,7 +175,6 @@ recencyQA enables research on:
 ## 📜 Citation
 
 If you use recencyQA, please cite:
-
 ```bibtex
 @inproceedings{piryani2026recencyqa,
   title={How Often Do Answers Change? Estimating Recency Requirements in Question Answering},
@@ -189,7 +189,6 @@ If you use recencyQA, please cite:
 ## 📄 Paper
 
 Paper PDF:
-
 ```
 [PAPER_LINK_PLACEHOLDER]
 ```
@@ -211,6 +210,4 @@ For questions, collaborations, or issues:
 - Adam Jatowt – adam.jatowt@uibk.ac.at  
 
 ---
-
-
-
+EOF
