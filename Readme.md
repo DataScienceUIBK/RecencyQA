@@ -185,13 +185,8 @@ recencyQA enables research on:
 ## 📜 Citation
 
 If you use recencyQA, please cite:
-```bibtex
-@inproceedings{piryani2026recencyqa,
-  title={How Often Do Answers Change? Estimating Recency Requirements in Question Answering},
-  author={Piryani, Bhawna and Mertz, Zehra and Jatowt, Adam},
-  booktitle={Proceedings of SIGIR 2026},
-  year={2026}
-}
+```
+Comming Soon
 ```
 
 ---
@@ -200,7 +195,7 @@ If you use recencyQA, please cite:
 
 Paper PDF:
 ```
-[PAPER_LINK_PLACEHOLDER]
+Comming Soon
 ```
 
 ---
