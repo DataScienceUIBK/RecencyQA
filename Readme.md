@@ -97,10 +97,20 @@ Once released, this section will provide:
 ## 📁 Dataset Format
 
 Each JSON entry follows this structure:
-
-
-
----
+```json
+{
+  "question": "...",
+  "recency_samples": ["A-Day", "... (13 total)"],
+  "majority_recency_label": "A-Day",
+  "recency_distribution": {
+    "A-Day": 9,
+    "A-Week": 3,
+    "A-Month": 1
+  },
+  "stationarity": "stationary",
+  "verified_context": "..."
+}
+```
 
 ## 🔬 What recencyQA Evaluates
 
