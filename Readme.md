@@ -83,7 +83,7 @@ Each question includes:
 
 The dataset is available in the `Dataset` folder:
 
-📁 **[Dataset/RecencyQA](./Dataset/RecencyQA)**
+📁 **[Dataset/RecencyQA](./Dataset/RecencyQA.json)**
 
 The dataset includes:
 
