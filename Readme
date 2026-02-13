@@ -112,3 +112,118 @@ Each JSON entry follows this structure:
 }
 
 
+---
+
+## 🔬 What recencyQA Evaluates
+
+recencyQA supports three levels of temporal evaluation:
+
+### 1️⃣ Recency Classification
+Can a model infer how often an answer changes from the question alone?
+
+### 2️⃣ Context Sensitivity
+Does adding temporal context improve performance — especially for non-stationary questions?
+
+### 3️⃣ Recency Transition (RL1 → RL2)
+Can a model adapt when the same question requires different recency labels under different contexts?
+
+---
+
+## 📈 Key Findings
+
+From experiments across multiple LLMs:
+
+- Fine-grained recency classification is difficult (24–52% strict accuracy)
+- Tolerant accuracy is significantly higher → models capture coarse temporal ordering
+- Context improves performance for non-stationary questions (up to +40%)
+- Context can harm performance for stationary questions
+- Transition accuracy remains very low → models struggle with dynamic adaptation
+
+**Conclusion:**  
+Current LLMs exhibit largely static temporal reasoning.
+
+---
+
+## 🏗 Dataset Construction Pipeline
+
+### 1️⃣ Question Collection
+- FreshQA  
+- PATQA  
+- SituatedQA  
+- LLaMA 3.3-generated event-based questions  
+
+### 2️⃣ Recency Labeling
+- 13 independent samples per question  
+- Majority voting  
+- Recency distribution retained  
+
+### 3️⃣ Stationarity Classification
+- GPT-5.2  
+- Gemini 3 Flash  
+- Claude Sonnet 4.5  
+- Cross-validation with recency distribution  
+
+### 4️⃣ Context Generation
+- Contexts generated to induce specific recency labels  
+- Verified via 13 re-classification runs  
+- Only strictly consistent contexts retained  
+
+---
+
+## 🚀 Research Applications
+
+recencyQA enables research on:
+
+- Recency-aware QA  
+- Retrieval-augmented generation (RAG) triggering  
+- Temporal confidence calibration  
+- Freshness-sensitive ranking  
+- Temporal drift analysis  
+- Dynamic multi-hop reasoning  
+- Recency-based retrieval gating  
+
+---
+
+## 📜 Citation
+
+If you use recencyQA, please cite:
+
+```bibtex
+@inproceedings{piryani2026recencyqa,
+  title={How Often Do Answers Change? Estimating Recency Requirements in Question Answering},
+  author={Piryani, Bhawna and Mertz, Zehra and Jatowt, Adam},
+  booktitle={Proceedings of SIGIR 2026},
+  year={2026}
+}
+```
+
+---
+
+## 📄 Paper
+
+Paper PDF:
+
+```
+[PAPER_LINK_PLACEHOLDER]
+```
+
+---
+
+## 📜 License
+
+Creative Commons Attribution 4.0 International License (CC BY 4.0)
+
+---
+
+## 🤝 Contact
+
+For questions, collaborations, or issues:
+
+- Bhawna Piryani – bhawna.piryani@uibk.ac.at  
+- Zehra Mertz – mertz@mef.edu.tr  
+- Adam Jatowt – adam.jatowt@uibk.ac.at  
+
+---
+
+
+
