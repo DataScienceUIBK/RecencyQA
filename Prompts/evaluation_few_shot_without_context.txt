@@ -1,1 +1,124 @@
+SYSTEM PROMPT:
 
+You are an analyst. Your task is to assign a label to a question. The label should reflect when you expect the answer to this question to change for the first time, based on the nature of the information it requires.
+
+================================================================================
+
+USER PROMPT (FEW-SHOT - WITHOUT CONTEXT):
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: What is the current temperature in Wichita, Kansas, as the storm approaches?
+RecencyLabel: An-Hour
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: How does a new subway line opening in Manhattan change ridership patterns over a three-week period?
+RecencyLabel: A-Few-Weeks
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: What is the current temperature in New York according to the latest forecast?
+RecencyLabel: A-Few-Hours
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: What is the name of Indonesia's future capital city?
+RecencyLabel: Many-Years
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: How long will the recall of Tasty Bites chicken nuggets last?
+RecencyLabel: A-Few-Days
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: Who is the head of the state of Indonesia currently?
+RecencyLabel: A-Few-Years
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: What impact is the recent economic growth expected to have on the monthly unemployment rate update?
+RecencyLabel: A-Month
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: How is the success of TechForAll's crowdfunding campaign expected to impact the company's future product development and business strategy?
+RecencyLabel: A-Few-Months
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: What alternative drinks are being recommended by baristas at the 5th Avenue Starbucks to customers who wanted a Pumpkin Spice Latte?
+RecencyLabel: A-Day
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: Are there any free events or workshops offered during the Laugh Out Loud comedy festival?
+RecencyLabel: A-Year
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: What is the name of the most recent episode of The Lord of the Rings: The Rings of Power?
+RecencyLabel: A-Week
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: Who is the director of the movie 'Galactic Odyssey'?
+RecencyLabel: Never
+
+Based on the question provided below, suppose you already know the correct answer right now.
+Assign a label based on how soon you expect this answer to change.
+Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Question: {question}
+RecencyLabel:
