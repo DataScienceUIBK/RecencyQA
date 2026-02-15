@@ -342,11 +342,17 @@ These results indicate **high annotation quality** and **reliable temporal inter
 ```
 RecencyQA/
 ├── data/
-│   └── recencyqa.json              # Complete dataset
+│   └── recencyqa.json                          # Your dataset
 ├── prompts/
-│   ├── zero_shot.txt               # Zero-shot prompts
-│   ├── few_shot.txt                # Few-shot prompts with examples
-│   └── chain_of_thought.txt        # CoT prompts with reasoning
+│   ├── recency_labeling_prompt.txt             # 3 labeling/generation prompts
+│   ├── stationarity_labeling_prompt.txt        
+│   ├── context_generation_prompt.txt           
+│   ├── evaluation_zero_shot_no_context.txt     # 3 evaluation prompts (no context)
+│   ├── evaluation_few_shot_no_context.txt      
+│   ├── evaluation_cot_no_context.txt           
+│   ├── evaluation_zero_shot_with_context.txt   # 3 evaluation prompts (with context)
+│   ├── evaluation_few_shot_with_context.txt    
+│   └── evaluation_cot_with_context.txt         
 ├── LICENSE
 └── README.md
 ```
