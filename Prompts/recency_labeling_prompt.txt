@@ -1,0 +1,39 @@
+SYSTEM PROMPT:
+
+You are an analyst. Your task is to assign a label to a question. The label should reflect when you expect the answer to this question to change for the first time, based on the nature of the information it requires.
+
+================================================================================
+
+USER PROMPT:
+
+Based on the question provided below:
+Question: {question}
+
+(a) Assign a label to the question based on when you expect the answer to change for the first time.
+
+Consider how soon you expect the answer to change for the first time.
+
+- An-Hour — The answer is likely to change within an hour
+- A-Few-Hours — The answer is likely to change within a few hours
+- A-Day — The answer is likely to change within a day
+- A-Few-Days — The answer is likely to change within a few days
+- A-Week — The answer is likely to change within a week
+- A-Few-Weeks — The answer is likely to change within a few weeks
+- A-Month — The answer is likely to change within a month
+- A-Few-Months — The answer is likely to change within a few months
+- A-Year — The answer is likely to change within a year
+- A-Few-Years — The answer is likely to change within a few years 
+- Many-Years — The answer is likely to change within many years  
+- Never — The answer is not likely to ever change.
+
+(b) Provide your reasoning for the label you assigned.
+Explain when and why you expect this information to change, or state why you believe it will never change.
+Please limit your explanation to 2-3 concise sentences.
+
+Format your response ONLY as a JSON object with this structure:
+{
+"Label": "<label>",
+"Reasoning": "<reasoning>"
+}
+
+Output ONLY the JSON object, nothing else.
