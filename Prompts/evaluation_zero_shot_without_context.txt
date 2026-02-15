@@ -11,18 +11,7 @@ Based on the question provided below, suppose you already know the correct answe
 Assign a label based on how soon you expect this answer to change.
 Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
 
-- An-Hour 
-- A-Few-Hours
-- A-Day
-- A-Few-Days
-- A-Week
-- A-Few-Weeks 
-- A-Month 
-- A-Few-Months
-- A-Year
-- A-Few-Years 
-- Many-Years 
-- Never
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
 
 Question: {question}
 
