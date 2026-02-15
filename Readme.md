@@ -49,19 +49,22 @@ Each JSON entry contains:
 
 ```json
 {
-  "question": "Who is leading the Olympic medal table?",
-  "recency_samples": ["A-Day", "A-Day", "A-Few-Hours", "A-Day", ...],
-  "majority_recency": "A-Day",
-  "recency_distribution": {
-    "A-Day": 0.77,
-    "A-Few-Hours": 0.23
-  },
-  "stationarity": "non-stationary",
-  "temporal_context": "During the 2024 Paris Olympics",
-  "source": "generated",
-  "multi_hop": false
+  "q_id": ,
+  "question": "",
+  "source": "" ,
+  "hop_type": "",
+  "unique_labels" : [],
+  "label_distribution": {},
+  "majority_label": "",
+  "label_contexts": [{
+            "recency_label": "",
+            "context": "",
+            }
+]
+  "final_stationary_label":"",
 }
 ```
+
 
 **Fields:**
 - `question`: The question text
