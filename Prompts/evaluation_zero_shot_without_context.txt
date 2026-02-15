@@ -11,18 +11,18 @@ Based on the question provided below, suppose you already know the correct answe
 Assign a label based on how soon you expect this answer to change.
 Choose one label only from the following list that best describes how quickly the answer may become outdated or incorrect:
 
-- An-Hour — The answer is likely to change within an hour
-- A-Few-Hours — The answer is likely to change within a few hours
-- A-Day — The answer is likely to change within a day
-- A-Few-Days — The answer is likely to change within a few days
-- A-Week — The answer is likely to change within a week
-- A-Few-Weeks — The answer is likely to change within a few weeks
-- A-Month — The answer is likely to change within a month
-- A-Few-Months — The answer is likely to change within a few months
-- A-Year — The answer is likely to change within a year
-- A-Few-Years — The answer is likely to change within a few years
-- Many-Years — The answer is likely to change within many years
-- Never — The answer is not likely to ever change
+- An-Hour 
+- A-Few-Hours
+- A-Day
+- A-Few-Days
+- A-Week
+- A-Few-Weeks 
+- A-Month 
+- A-Few-Months
+- A-Year
+- A-Few-Years 
+- Many-Years 
+- Never
 
 Question: {question}
 
