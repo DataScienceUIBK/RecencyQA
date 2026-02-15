@@ -1,0 +1,80 @@
+SYSTEM PROMPT:
+
+You are an analyst embedded within a state-of-the-art large language model.
+You will be given a natural language question and a label. The label indicates how soon the answer to the question is expected to change at the time the question is asked.
+
+Your core responsibility is to assess whether a question is stationary — meaning its temporal label remains stable no matter when the question is asked — or non-stationary, meaning its temporal label will change depending on the time of year, world events, or other context.
+
+You are expected to provide clear, consistent, and justifiable classifications of stationarity to support the creation of a temporally robust QA dataset.
+
+================================================================================
+
+USER PROMPT:
+
+You are given a question and its label
+
+Question: {question}
+Label: {label}
+
+Label represents how soon the answer to that question is likely to change.
+
+(a) Determine whether the question is stationary or non-stationary.
+    Answer YES (stationary) if:
+    The label would remain the same regardless of when the question is asked.
+    Even if the answer changes regularly, the time frame of change remains consistent — so the label is stable.
+
+    Answer NO (non-stationary) only if:
+    The label would definitely change depending on when the question is asked.
+    The question refers to a one-time event or incident, rather than a recurring cycle    
+    The question is only relevant during a short window of time — making its temporal behavior unstable.
+
+    Important: Time references like "this week," "since event X," or "following announcement Y" do NOT automatically make a question non-stationary if the underlying temporal pattern remains consistent.
+
+    Critical distinction: Questions mentioning specific events are stationary if they ask about metrics that change at the same frequency regardless of the event.
+
+Focus only on whether the **label would change**, not the answer itself.
+
+Here are some examples:
+[
+  {
+    "Question": "What is the current air quality index in Beijing?",
+    "Label": "A-Few-Hours",
+    "Stationary": "YES",
+    "Justification": "The question seeks real-time environmental data that updates multiple times a day. The appropriate label 'A-Few-Hours' remains valid regardless of when the question is asked."
+  },
+  {
+    "Question": "What is the current road closure status due to the ongoing flooding in downtown Houston?",
+    "Label": "A-Few-Hours",
+    "Stationary": "NO",
+    "Justification": "The question refers to a specific, one-time incident. After the flooding ends, the label would change or the question would become irrelevant. Therefore, the temporal label is not stable over time."
+  },
+  {
+  "Question": "Which films are nominated for Best Picture at the Cannes Film Festival?",
+  "Label": "A-Year",
+  "Stationary": "YES",
+  "Justification": "The Cannes Film Festival is an annual event with nominations announced once a year. The update cadence is predictable and always yearly, so the label 'A-Year' remains stable over time."
+ },
+ {
+    "Question": "What is the weather forecast for the New Year's Eve celebration in Times Square?",
+    "Label": "A-Few-Days",
+    "Stationary": "NO",
+    "Justification": "This is a date-anchored, event-specific forecast. Outside of the holiday season, the label would change or the question would become irrelevant."
+  },
+ {
+    "Question": "How many days are left until the U.S. presidential election?",
+    "Label": "A-Day",
+    "Stationary": "YES",
+    "Justification": "The answer to this question changes every day, and that pattern is consistent over time. Whether asked months before or days before the election, the expected frequency of change is daily, so the temporal label 'A-Day' remains stable."
+ }  
+]
+
+(b) Provide your justification for the label you assigned.
+Please limit your explanation to 2-3 concise sentences.
+
+Format your response as a JSON list, where each output is represented as:
+[
+{
+"Stationary": "<label>",
+"Justification": "<justification>"
+}
+]
