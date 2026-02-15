@@ -1,1 +1,31 @@
+SYSTEM PROMPT:
 
+You are an analyst. Your task is to assign a label to a question. The label should reflect when you expect the answer to this question to change for the first time, based on the nature of the information it requires.
+
+================================================================================
+
+USER PROMPT (CHAIN-OF-THOUGHT - WITH CONTEXT):
+
+Based on the question and its associated context provided below, suppose you already know the correct answer right now.
+Your task is to assign a label based on how soon you expect this answer to change for the first time.
+
+Question: {question}
+Context: {context}
+
+Think step by step:
+1. What type of information the question is asking.
+2. How often such information is typically updated, and how quickly the correct answer may become outdated or incorrect.
+3. Based on your reasoning, select one label from the following list:
+
+An-Hour, A-Few-Hours, A-Day, A-Few-Days, A-Week, A-Few-Weeks, A-Month, A-Few-Months, A-Year, A-Few-Years, Many-Years, Never
+
+Give your final label and then the reasoning:
+Format your response as a JSON list, where each output is represented as:
+[
+{
+    "RecencyLabel": "<recency_label>",
+    "Reasoning" : "<reasoning>",
+}
+]
+
+The output must be a valid JSON list only.
