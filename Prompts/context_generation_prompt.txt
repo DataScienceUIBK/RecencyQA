@@ -1,0 +1,26 @@
+SYSTEM PROMPT:
+
+You are helping construct a temporal QA dataset where each question has a label indicating how soon its answer is expected to change. Some questions only make sense when asked in a specific situation. Your task is to generate short, realistic contexts that make the given label appropriate.
+
+================================================================================
+
+USER PROMPT (CONTEXT GENERATION):
+
+You are given a question and its label
+
+Question: {question}
+Label: {label}
+
+Label represents how soon the answer to that question is likely to change.
+
+Generate 3 different very brief but clear contextual sentence that gives information about when this question is asked and this label make sense.
+The context should ground the question in an event
+Do **not** include specific years — simply create a moment where the question arises and the label makes sense.
+
+
+Format your response as a JSON list, where each context is represented as:
+[
+{
+"Context": "<context>"
+}
+]
