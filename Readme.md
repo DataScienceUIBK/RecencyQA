@@ -169,38 +169,50 @@ cd RecencyQA
 import json
 
 # Load RecencyQA dataset
-with open('data/recencyqa.json', 'r') as f:
+with open('Dataset/Recencyqa.json', 'r') as f:
     dataset = json.load(f)
 
 # Example: Access first question
 question = dataset[0]
 print(f"Question: {question['question']}")
-print(f"Recency: {question['majority_recency']}")
-print(f"Stationarity: {question['stationarity']}")
-print(f"Context: {question['temporal_context']}")
+print(f"Q_ID: {question['q_id']}")
+print(f"Majority Label: {question['majority_label']}")
+print(f"Stationarity: {question['final_stationary_label']}")
+print(f"Source: {question['source']}")
+print(f"Hop Type: {question['hop_type']}")
+
+# Access label contexts
+for ctx in question['label_contexts']:
+    print(f"Label: {ctx['recency_label']}, Context: {ctx['context']}")
 ```
 
 ### Filter by Properties
 
 ```python
 # Filter non-stationary questions
-non_stationary = [q for q in dataset if q['stationarity'] == 'non-stationary']
+non_stationary = [q for q in dataset if q['final_stationary_label'] == 'Non-Stationary']
 print(f"Non-stationary questions: {len(non_stationary)}")
 
 # Filter high-frequency recency (hourly/daily updates)
 high_frequency = [q for q in dataset 
-                  if q['majority_recency'] in ['An-Hour', 'A-Few-Hours', 'A-Day']]
+                  if q['majority_label'] in ['An-Hour', 'A-Few-Hours', 'A-Day']]
 print(f"High-frequency questions: {len(high_frequency)}")
 
 # Filter multi-hop questions
-multihop = [q for q in dataset if q['multi_hop'] == True]
+multihop = [q for q in dataset if q['hop_type'] == 'Multi-Hop']
 print(f"Multi-hop questions: {len(multihop)}")
 
 # Get recency distribution for a question
 question = dataset[0]
-print(f"Recency distribution: {question['recency_distribution']}")
-```
+print(f"Recency distribution: {question['label_distribution']}")
+print(f"Unique labels: {question['unique_labels']}")
+print(f"Confidence: {question['confidence']}")
+print(f"Entropy: {question['entropy']}")
 
+# Filter by source
+freshqa_questions = [q for q in dataset if q['source'] == 'freshqa']
+print(f"FreshQA questions: {len(freshqa_questions)}")
+```
 ---
 
 ## 🔬 What RecencyQA Evaluates
