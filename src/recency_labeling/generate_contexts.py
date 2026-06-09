@@ -385,10 +385,6 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    print(colored("\n" + "="*80, "magenta"))
-    print(colored("  CONTEXT GENERATION FOR UNIQUE LABELS", "magenta", attrs=["bold"]))
-    print(colored("="*80 + "\n", "magenta"))
-    
     generate_contexts_for_dataset(
         args.input,
         args.output,
