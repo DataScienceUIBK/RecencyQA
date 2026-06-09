@@ -1,305 +1,398 @@
 import json
 import os
 import re
-import traceback
-from datetime import datetime
+from termcolor import colored
+import argparse
 from tqdm import tqdm
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from termcolor import colored
 
 
-DEFAULT_MODEL = "meta-llama/Llama-3.3-70B-Instruct"
-DEFAULT_BATCH_SIZE = 2
-MAX_RETRIES = 2
-
-
-SYSTEM_PROMPT = """You are helping construct a temporal QA dataset where each question has a label indicating how soon its answer is expected to change. Some questions only make sense when asked in a specific situation. Your task is to generate short, realistic contexts that make the given label appropriate."""
+system_prompt = """You are helping construct a temporal QA dataset where each question has a label indicating how soon its answer is expected to change. Some questions only make sense when asked in a specific situation. Your task is to generate short, realistic contexts that make the given label appropriate."""
 
 
 def build_user_prompt(question, label):
     return f"""
-You are given a question and its label.
+You are given a question and its label
 
 Question: {question}
 Label: {label}
 
 Label represents how soon the answer to that question is likely to change.
 
-Generate 3 different very brief but clear contextual sentences that give information about when this question is asked and make this label appropriate.
-The context should ground the question in an event.
-Do not include specific years — simply create a moment where the question arises and the label makes sense.
+Generate 3 different, very brief but clear contextual sentences that give information about when this question is asked, and this label makes sense.
+The context should ground the question in an event
+Do **not** include specific years — simply create a moment where the question arises and the label makes sense.
 
-Format your response as a JSON list:
+
+Format your response as a JSON list, where each context is represented as:
 [
-  {{
-    "Context": "<context>"
-  }}
+{{
+"Context": "<context>"
+}}
 ]
-
-Output ONLY the JSON list, nothing else.
+Output ONLY the JSON list.
 """
 
 
-class ContextGenerator:
-    def __init__(self, model_name, batch_size=DEFAULT_BATCH_SIZE):
-        self.model_name = model_name
-        self.batch_size = batch_size
-        self.model = None
-        self.tokenizer = None
+def load_model(model_name="meta-llama/Llama-3.3-70B-Instruct"):
+    print(colored(f"\n🔄 Loading model: {model_name}", "cyan"))
+    
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "left"
+    
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        torch_dtype=torch.bfloat16, 
+        device_map="auto"
+    )
+    
+    print(colored(f"✓ Model loaded", "green"))
+    return tokenizer, model
 
-    def load_model(self):
-        print(colored("Loading model and tokenizer...", "cyan", attrs=["bold"]))
 
-        self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        self.tokenizer.padding_side = "left"
-
-        if self.tokenizer.pad_token is None:
-            self.tokenizer.pad_token = self.tokenizer.eos_token
-
-        self.model = AutoModelForCausalLM.from_pretrained(
-            self.model_name,
-            torch_dtype=torch.float16,
-            device_map="auto"
-        )
-
-        print(colored("Model loaded.\n", "green"))
-
-    def build_model_prompt(self, user_prompt):
+def generate_contexts_batch(questions_batch, labels_batch, tokenizer, model, max_retries=3):
+    """
+    Generate contexts for a batch of (question, label) pairs.
+    
+    Returns:
+        List of lists, where each inner list contains 3 context dicts
+    """
+    # Prepare all prompts
+    all_messages = []
+    for question, label in zip(questions_batch, labels_batch):
+        user_prompt = build_user_prompt(question, label)
         messages = [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
         ]
-
-        if self.tokenizer.chat_template is not None:
-            return self.tokenizer.apply_chat_template(
-                messages,
-                tokenize=False,
-                add_generation_prompt=True
-            )
-
-        return f"{SYSTEM_PROMPT}\n\n{user_prompt}\n\n"
-
-    def generate_batch(self, prompts, temperature=0.7):
-        inputs = self.tokenizer(
-            prompts,
-            return_tensors="pt",
-            padding=True,
-            truncation=True
-        ).to(self.model.device)
-
-        with torch.no_grad():
-            outputs = self.model.generate(
-                **inputs,
-                max_new_tokens=512,
-                do_sample=True,
-                temperature=temperature,
-                top_p=0.9,
-                pad_token_id=self.tokenizer.eos_token_id
-            )
-
-        responses = []
-        for i, output in enumerate(outputs):
-            input_len = inputs["input_ids"][i].shape[-1]
-            response = self.tokenizer.decode(
-                output[input_len:],
-                skip_special_tokens=True
-            ).strip()
-            responses.append(response)
-
-        return responses
-
-    def extract_contexts(self, response_text):
-        match = re.search(r"\[[\s\S]*\]", response_text)
-
-        if not match:
-            return None
-
+        all_messages.append(messages)
+    
+    results = [None] * len(questions_batch)
+    indices_to_retry = list(range(len(questions_batch)))
+    
+    for attempt in range(max_retries):
+        if not indices_to_retry:
+            break
+        
+        # Get prompts for items that need (re)trying
+        current_messages = [all_messages[i] for i in indices_to_retry]
+        
         try:
-            parsed = json.loads(match.group())
 
-            contexts = []
-            for item in parsed:
-                context = item.get("Context", "").strip()
-                if context:
-                    contexts.append({"Context": context})
-
-            if len(contexts) == 0:
-                return None
-
-            return contexts
-
-        except Exception:
-            return None
-
-    def generate_contexts_for_pair(self, question, label):
-        user_prompt = build_user_prompt(question, label)
-        full_prompt = self.build_model_prompt(user_prompt)
-
-        for retry in range(MAX_RETRIES + 1):
-            temperature = 0.7 if retry == 0 else 0.3
-            response = self.generate_batch([full_prompt], temperature=temperature)[0]
-            contexts = self.extract_contexts(response)
-
-            if contexts:
-                return contexts, response, retry
-
-        return None, response, MAX_RETRIES
-
-
-def load_json_or_jsonl(path):
-    if path.endswith(".jsonl"):
-        data = []
-        with open(path, "r", encoding="utf-8") as f:
-            for line in f:
-                if line.strip():
-                    data.append(json.loads(line))
-        return data
-
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def append_jsonl(item, path):
-    with open(path, "a", encoding="utf-8") as f:
-        f.write(json.dumps(item, ensure_ascii=False) + "\n")
-
-
-def get_unique_labels(record):
-    """
-    Uses every unique recency label assigned to a question.
-    For non-stationary questions, this means all labels in label_distribution.
-    For stationary questions, this usually means one label.
-    """
-    label_distribution = record.get("label_distribution", {})
-
-    if label_distribution:
-        return list(label_distribution.keys())
-
-    if record.get("majority_label"):
-        return [record["majority_label"]]
-
-    return []
-
-
-def load_processed_pairs(output_path):
-    processed = set()
-
-    if not os.path.exists(output_path):
-        return processed
-
-    with open(output_path, "r", encoding="utf-8") as f:
-        for line in f:
-            if line.strip():
-                item = json.loads(line)
-                processed.add((item["q_id"], item["label"]))
-
-    return processed
-
-
-def process_dataset(input_file, output_dir, output_file, model_name, batch_size):
-    os.makedirs(output_dir, exist_ok=True)
-
-    output_path = os.path.join(output_dir, output_file)
-    failed_path = os.path.join(
-        output_dir,
-        output_file.replace(".json", "_failed.jsonl")
-    )
-
-    data = load_json_or_jsonl(input_file)
-
-    generator = ContextGenerator(model_name, batch_size=batch_size)
-    generator.load_model()
-
-    final_results = []
-
-    for record in tqdm(data, desc="Generating contexts"):
-        q_id = record["q_id"]
-        question = record["question"]
-
-        unique_labels = record.get("unique_labels")
-        if unique_labels is None:
-            unique_labels = list(record.get("label_distribution", {}).keys())
-
-        label_contexts = {}
-
-        for label in unique_labels:
-            try:
-                contexts, raw_response, retry_count = generator.generate_contexts_for_pair(
-                    question,
-                    label
+            texts = [
+                tokenizer.apply_chat_template(
+                    messages,
+                    tokenize=False,
+                    add_generation_prompt=True
                 )
+                for messages in current_messages
+            ]
+            
 
-                if contexts is None:
-                    failed = {
-                        "q_id": q_id,
-                        "question": question,
-                        "label": label,
-                        "failure_reason": "failed_to_parse_contexts",
-                        "raw_response": raw_response,
-                        "failed_at": datetime.now().isoformat()
-                    }
-                    append_jsonl(failed, failed_path)
-                    label_contexts[label] = []
-                else:
-                    label_contexts[label] = contexts
+            model_inputs = tokenizer(
+                texts, 
+                return_tensors="pt", 
+                padding=True,
+                truncation=True
+            ).to(model.device)
+            
+            with torch.no_grad():
+                generated_ids = model.generate(
+                    **model_inputs,
+                    max_new_tokens=2048,
+                    temperature=0.1,
+                    do_sample=True,
+                    top_p=0.9,
+                    pad_token_id=tokenizer.eos_token_id
+                )
+            
 
-            except Exception:
-                failed = {
-                    "q_id": q_id,
-                    "question": question,
-                    "label": label,
-                    "failure_reason": "processing_error",
-                    "error_details": traceback.format_exc(),
-                    "failed_at": datetime.now().isoformat()
-                }
-                append_jsonl(failed, failed_path)
-                label_contexts[label] = []
+            generated_ids = [
+                output_ids[len(input_ids):] 
+                for input_ids, output_ids in zip(model_inputs.input_ids, generated_ids)
+            ]
+            
+            responses = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
+            
+            new_failures = []
+            for i, response in enumerate(responses):
+                original_idx = indices_to_retry[i]
+                
+                try:
+                    # Extract JSON
+                    if "```json" in response:
+                        response = response.split("```json")[1].split("```")[0].strip()
+                    elif "```" in response:
+                        response = response.split("```")[1].split("```")[0].strip()
+                    
+                    match = re.search(r"\[[\s\S]*\]", response)
 
-        output_item = {
-            "q_id": q_id,
-            "question": question,
-            "source": record.get("source"),
-            "hop_type": record.get("hop_type"),
-            "all_labels": record.get("all_labels"),
-            "unique_labels": unique_labels,
-            "label_distribution": record.get("label_distribution"),
-            "majority_label": record.get("majority_label"),
-            "confidence": record.get("confidence"),
-            "entropy": record.get("entropy"),
-            "label_contexts": label_contexts
-        }
+                    if not match:
+                        raise json.JSONDecodeError(
+                            "No JSON list found",
+                            response,
+                            0
+                        )
+                    
+                    parsed = json.loads(match.group())
+                    
+                    # Validate: should be a list of 3 context objects
+                    if isinstance(parsed, list) and len(parsed) == 3:
+                        # Check each has "Context" key
+                        if all("Context" in item for item in parsed):
+                            results[original_idx] = parsed
+                        else:
+                            new_failures.append(original_idx)
+                    else:
+                        new_failures.append(original_idx)
+                
+                except json.JSONDecodeError:
+                    new_failures.append(original_idx)
+            
+            indices_to_retry = new_failures
+            
+            if indices_to_retry and attempt < max_retries - 1:
+                print(colored(f"  🔄 Retrying {len(indices_to_retry)} failed parse(s) (attempt {attempt + 2}/{max_retries})", "yellow"))
+        
+        except Exception as e:
+            print(colored(f"  ⚠️ Batch error (attempt {attempt + 1}/{max_retries}): {e}", "yellow"))
+            if attempt == max_retries - 1:
+                # Fill failures with error
+                for idx in indices_to_retry:
+                    results[idx] = [
+                        {"Context": "[ERROR: Failed to generate context]"},
+                        {"Context": "[ERROR: Failed to generate context]"},
+                        {"Context": "[ERROR: Failed to generate context]"}
+                    ]
+                indices_to_retry = []
+    
+    # Fill any remaining failures
+    for idx in indices_to_retry:
+        if results[idx] is None:
+            results[idx] = [
+                {"Context": "[ERROR: Failed after retries]"},
+                {"Context": "[ERROR: Failed after retries]"},
+                {"Context": "[ERROR: Failed after retries]"}
+            ]
+    
+    return results
 
-        final_results.append(output_item)
 
-        # save incrementally after every question
-        with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(final_results, f, indent=2, ensure_ascii=False)
+def load_processed_questions(output_file):
+    if not os.path.exists(output_file):
+        return set(), []
+    
+    try:
+        with open(output_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # Check if question has contexts generated for all unique labels
+        processed_ids = set()
+        for item in data:
+            if 'label_contexts' in item:
+                # Check if all unique labels have contexts
+                unique_labels = item.get('unique_labels', [])
+                label_contexts = item.get('label_contexts', {})
+                if all(label in label_contexts for label in unique_labels):
+                    processed_ids.add(item['q_id'])
+        
+        print(colored(f"✓ Found {len(processed_ids)} already processed questions", "yellow"))
+        return processed_ids, data
+    except Exception as e:
+        print(colored(f"⚠️  Error reading output file: {e}", "red"))
+        return set(), []
 
-    print(colored("\nContext generation complete.", "green", attrs=["bold"]))
-    print(colored(f"Output: {output_path}", "cyan"))
-    print(colored(f"Failed: {failed_path}", "yellow"))
+
+def generate_contexts_for_dataset(input_file, output_file, model_name="meta-llama/Llama-3.3-70B-Instruct", 
+                                   batch_size=8):
+    """
+    Generate contexts for each unique label in each question.
+    
+    For each question with unique_labels = ["A-Year", "Never"], this will:
+    1. Generate 3 contexts for "A-Year" 
+    2. Generate 3 contexts for "Never"
+    3. Store as: label_contexts = {"A-Year": [...], "Never": [...]}
+    """
+    
+    try:
+
+        with open(input_file, 'r', encoding='utf-8') as f:
+            input_data = json.load(f)
+        
+        print(colored(f"✓ Loaded {len(input_data)} questions from {input_file}", "green"))
+        print(colored(f"📦 Batch size: {batch_size}", "cyan"))
+        
+
+        output_dir = os.path.dirname(output_file)
+
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+
+        processed_ids, output_data = load_processed_questions(output_file)
+        
+        output_map = {item['q_id']: item for item in output_data}
+        
+        remaining = [q for q in input_data if q['q_id'] not in processed_ids]
+        question_lookup = {q["q_id"]: q for q in remaining}
+
+        print(colored(f"✅ Already processed: {len(processed_ids)}", "yellow"))
+                
+        if not remaining:
+            print(colored("\n✅ All questions already processed!", "green"))
+            return output_data
+        
+        print(colored(f"\n🔄 Processing {len(remaining)} remaining questions...\n", "cyan"))
+        
+        tokenizer, model = load_model(model_name)
+        
+        # Flatten: create (question, label) pairs for batching
+        batch_items = []
+        for question_data in remaining:
+            unique_labels = question_data.get('unique_labels', [])
+            for label in unique_labels:
+                batch_items.append({
+                    'q_id': question_data['q_id'],
+                    'question': question_data['question'],
+                    'label': label,
+                    'question_data': question_data
+                })
+        
+        print(colored(f"📊 Total (question, label) pairs to process: {len(batch_items)}", "cyan"))
+        
+        num_batches = (len(batch_items) + batch_size - 1) // batch_size
+        
+        # Store contexts temporarily by q_id
+        temp_contexts = {}
+        
+        for batch_idx in tqdm(range(num_batches), desc="Processing batches"):
+            start_idx = batch_idx * batch_size
+            end_idx = min(start_idx + batch_size, len(batch_items))
+            batch = batch_items[start_idx:end_idx]
+            
+            questions_batch = [item['question'] for item in batch]
+            labels_batch = [item['label'] for item in batch]
+            
+            contexts_batch = generate_contexts_batch(questions_batch, labels_batch, tokenizer, model)
+            
+            for item, contexts in zip(batch, contexts_batch):
+                q_id = item['q_id']
+                label = item['label']
+                
+                if q_id not in temp_contexts:
+                    temp_contexts[q_id] = {}
+                
+                temp_contexts[q_id][label] = contexts
+
+            completed_questions = []
+            
+            for q_id, label_contexts in temp_contexts.items():
+                question_data = question_lookup.get(q_id)
+                if question_data is None:
+                    continue
+                                
+                unique_labels = question_data.get('unique_labels', [])
+                
+                if all(label in label_contexts for label in unique_labels):
+                    # Add contexts to question data
+                    question_data['label_contexts'] = label_contexts
+                    
+                    if q_id in output_map:
+                        output_map[q_id].update(question_data)
+                    else:
+                        output_data.append(question_data)
+                        output_map[q_id] = question_data
+                    
+                    with open(output_file, 'w', encoding='utf-8') as f:
+                        json.dump(output_data, f, indent=2, ensure_ascii=False)
+
+                    completed_questions.append(q_id)
+
+            for q_id in completed_questions:
+                del temp_contexts[q_id]
+        
+        print(colored(f"\n✅ Context generation complete!", "green", attrs=["bold"]))
+        print(colored(f"💾 Saved to: {output_file}", "green"))
+        print(colored(f"📊 Processed {len(output_data)} questions", "cyan"))
+        
+        print_statistics(output_data)
+        
+        return output_data
+    
+    except Exception as e:
+        print(colored(f"❌ Error: {e}", "red"))
+        import traceback
+        traceback.print_exc()
+        return None
+
+
+def print_statistics(data):
+
+    print(colored("\n📊 Context Generation Statistics:", "cyan", attrs=["bold"]))
+    
+    questions_with_contexts = sum(1 for item in data if 'label_contexts' in item)
+    total_labels = sum(len(item.get('label_contexts', {})) for item in data)
+    total_contexts = sum(
+        sum(len(contexts) for contexts in item.get('label_contexts', {}).values())
+        for item in data
+    )
+    
+    print(colored(f"\n  Questions with contexts: {questions_with_contexts}/{len(data)}", "green"))
+    print(colored(f"  Total labels with contexts: {total_labels}", "cyan"))
+    print(colored(f"  Total contexts generated: {total_contexts}", "cyan"))
+    
+    example = next((item for item in data if 'label_contexts' in item), None)
+    if example:
+        print(colored("\n📋 Example:", "cyan", attrs=["bold"]))
+        print(colored(f"\n  Q{example['q_id']}: {example['question']}", "white"))
+        print(colored(f"  Unique labels: {example['unique_labels']}", "yellow"))
+        
+        for label, contexts in example.get('label_contexts', {}).items():
+            print(colored(f"\n  Label: {label}", "green", attrs=["bold"]))
+            for i, ctx in enumerate(contexts, 1):
+                print(colored(f"    {i}. {ctx.get('Context', 'N/A')}", "white"))
 
 
 if __name__ == "__main__":
-    import argparse
-
     parser = argparse.ArgumentParser(
-        description="Generate temporal contexts for each question-label pair"
+        description="Generate contexts for each unique label in questions"
     )
-
-    parser.add_argument("--input", type=str, required=True)
-    parser.add_argument("--output-dir", type=str, default="outputs/context_generation")
-    parser.add_argument("--output", type=str, default="generated_contexts.jsonl")
-    parser.add_argument("--model", type=str, default=DEFAULT_MODEL)
-    parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
-
+    parser.add_argument(
+        "--input",
+        type=str,
+        required=True,
+        help="Path to input JSON file"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        required=True,
+        help="Path to output JSON file"
+    )
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="meta-llama/Llama-3.3-70B-Instruct",
+        help="HuggingFace model name"
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=8,
+        help="Number of (question, label) pairs per batch (default: 8)"
+    )
+    
     args = parser.parse_args()
-
-    process_dataset(
-        input_file=args.input,
-        output_dir=args.output_dir,
-        output_file=args.output,
-        model_name=args.model,
-        batch_size=args.batch_size
+    
+    print(colored("\n" + "="*80, "magenta"))
+    print(colored("  CONTEXT GENERATION FOR UNIQUE LABELS", "magenta", attrs=["bold"]))
+    print(colored("="*80 + "\n", "magenta"))
+    
+    generate_contexts_for_dataset(
+        args.input,
+        args.output,
+        args.model,
+        args.batch_size
     )
+    
