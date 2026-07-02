@@ -39,9 +39,7 @@ This enables fine-grained evaluation of temporal awareness in QA systems beyond 
 
 ## 📁 Dataset
 
-The RecencyQA dataset is available in this repository under `data/`:
-
-📁 **[Dataset/RecencyQA](./Dataset/RecencyQA.json)** → Complete dataset with all annotations
+The RecencyQA dataset is available upon request. To request access, please email [bhawna.piryani@uibk.ac.at](mailto:bhawna.piryani@uibk.ac.at).
 
 ### Dataset Format
 
