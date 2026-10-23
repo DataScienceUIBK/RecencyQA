@@ -39,7 +39,10 @@ This enables fine-grained evaluation of temporal awareness in QA systems beyond 
 
 ## 📁 Dataset
 
-The RecencyQA dataset is available upon request. To request access, please email [bhawna.piryani@uibk.ac.at](mailto:bhawna.piryani@uibk.ac.at).
+The **RecencyQA dataset** is publicly available. [**Click here to download the dataset**](https://raw.githubusercontent.com/DataScienceUIBK/RecencyQA/main/dataset/RececnyQA_dataset(2).json).
+
+For questions related to the dataset, please email [bhawna.piryani@uibk.ac.at](mailto:bhawna.piryani@uibk.ac.at).
+
 
 ### Dataset Format
 
