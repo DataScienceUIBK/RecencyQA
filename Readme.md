@@ -51,24 +51,19 @@ Each JSON entry contains:
   "question": "",
   "source": "" ,
   "hop_type": "",
-  "unique_labels" : [],
-  "label_distribution": {},
-  "majority_label": "",
+  "rececny_label": "",
   "label_contexts": [{
             "recency_label": "",
             "context": "",
             }
 ]
-  "final_stationary_label":"",
+  "stationary_label":"",
 }
 ```
 
 
 **Fields:**
 - `question`: The question text
-- `recency_samples`: 13 independent recency annotations from LLaMA 3.3 (70B)
-- `majority_recency`: Primary recency label (majority vote)
-- `recency_distribution`: Distribution over all 12 recency classes
 - `stationarity`: "stationary" or "non-stationary"
 - `temporal_context`: Verified context that grounds the recency interpretation
 - `source`: Origin dataset (freshqa/patqa/situatedqa/generated)
